@@ -1,12 +1,11 @@
 import pandas as pd
 import re
-import numpy as np
 
 
-def read_bike_data():
+def read_bike_data() -> pd.DataFrame:
     """
     Reads bike data from 2 separate json files and unions them roughly
-    :return: pd.DataFrame, all bike data for a subset of columns
+    :return: All bike data for a subset of columns
     """
     # read data from local json file and remove price so it doesn't accidentally get added to features.
     ebay = pd.read_json('bike-ad-data/data_ebay.json', lines=True).drop('Price', axis=1)
@@ -23,8 +22,8 @@ def read_bike_data():
     }
 
     ''' 
-    for the columns without a clear mapping, we should search through the ebay listing for relevant language based on the 
-    entries from bike exchange data. In the interest of time, we will skip those.
+    for the columns without a clear mapping, we should search through the ebay listing for relevant language based on 
+    the entries from bike exchange data. In the interest of time, we will skip those.
     '''
 
     # combine some columns in the eBay data because it is less formal than bike exchange
@@ -37,26 +36,26 @@ def read_bike_data():
     return pd.concat([be_used, ebay_used[keep_cols]])
 
 
-def regex_get_first_num_in_str(free_text):
+def regex_get_first_num_in_str(free_text: str) -> int:
     """
     Reduce a string to the first number present. If there is not a number in the string, it returns -1
-    :param free_text: str, String to reduce
-    :return: int, the first number in the string
+    :param free_text: String to reduce
+    :return: The first number in the string
     """
     try:
-        out = re.findall(r'^\D*(\d+)', free_text)[0]
+        out = int(re.findall(r'^\D*(\d+)', free_text)[0])
     except IndexError:
         out = -1
 
     return out
 
 
-def reduce_col_to_first_number(df, column):
+def reduce_col_to_first_number(df: pd.DataFrame, column: str) -> pd.DataFrame:
     """
     Extracts first number in the column and removes all other text.
-    :param df: pd.DataFrame, table containing column to be reduced
-    :param column: str, text title of column in dataframe that should be reduced
-    :return: pd.DataFrame, the input dataframe with the single specified column reduced
+    :param df: Table containing column to be reduced
+    :param column: Text title of column in dataframe that should be reduced
+    :return: The input dataframe with the single specified column reduced
     """
     # get the first number of the free text description of size. With more time we would have something more elegant
     df[column] = df[column].fillna(' ').apply(regex_get_first_num_in_str).astype(int)
